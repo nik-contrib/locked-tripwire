@@ -5,8 +5,7 @@ compile_error!(
 
 cargo install --locked cargo-nextest
 
-For more, see https://nexte.st/docs/installation/from-source/".
-);
+For more, see https://nexte.st/docs/installation/from-source/.");
 
 #[cfg(not(feature = "nextest"))]
 compile_error!(
