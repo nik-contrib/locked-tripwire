@@ -14,7 +14,7 @@ For this reason, many projects including cargo-nextest [clearly document](https:
 
 ## How it works
 
-This crate has two versions: 0.1.0 and 0.1.1000. Version 0.1.0 is empty, while version 0.1.1000 has a `compile_error!` statement in it with a helpful message.
+This crate has two versions: 0.1.0 and 0.1.1001. Version 0.1.0 is empty, while version 0.1.1001 has a `compile_error!` statement in it with a helpful message.
 
 In your top-level binary crate's `Cargo.lock`, add:
 
@@ -25,7 +25,7 @@ locked-tripwire = "0.1.0"
 
 Then, run `cargo update locked-tripwire --precise 0.1.0`.
 
-When used without `--locked`, `cargo install xxx` will update this crate to 0.1.1000, causing the tripwire to be triggered.
+When used without `--locked`, `cargo install xxx` will update this crate to 0.1.1001, causing the tripwire to be triggered.
 
 When used with `--locked`, `cargo install xxx` will preserve the 0.1.0 version of this crate.
 
