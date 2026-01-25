@@ -1,0 +1,39 @@
+# `--locked` tripwire
+
+The goal of this crate is to prevent the use of `cargo install xxx` without `--locked`.
+
+This crate is built for the needs of [cargo-nextest](https://nexte.st/), though anyone in the ecosystem who wishes to have the same behavior is welcome to use it.
+
+## Why is a plain `cargo install` bad?
+
+By default, `cargo install xxx` pulls in the latest semver-compatible versions of dependencies. This works most of the time. But sometimes, innocuous updates to dependencies can break the build anyway.
+
+For example, pulling a dependency into scope can cause [`AsRef::as_ref`](https://doc.rust-lang.org/std/convert/trait.AsRef.html) to [no longer be unique](https://github.com/nextest-rs/nextest/issues/2990).
+
+For this reason, many projects including cargo-nextest [clearly document](https://nexte.st/docs/installation/from-source/) that a plain `cargo install cargo-nextest` without `--locked` is not supported. But many users may miss this documentation and file issues when it fails, increasing maintainer support load.
+
+## How it works
+
+This crate has two versions: 0.1.0 and 0.1.999. Version 0.1.0 is empty, while version 0.1.999 has a `compile_error!` statement in it with a helpful message.
+
+In your top-level binary crate's `Cargo.lock`, add:
+
+```toml
+[dependencies]
+locked-tripwire = "0.1.0"
+```
+
+Then, run `cargo update locked-tripwire --precise 0.1.0`.
+
+When used without `--locked`, `cargo install xxx` will update this crate to 0.1.999, causing the tripwire to be triggered.
+
+When used with `--locked`, `cargo install xxx` will preserve the 0.1.0 version of this crate.
+
+## Features
+
+The `nextest` feature customizes the error message to be cargo-nextest specific.
+
+## License
+
+This project is available under the terms of either the [Apache 2.0 license](LICENSE-APACHE) or the [MIT
+license](LICENSE-MIT).
