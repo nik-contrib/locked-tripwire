@@ -1,3 +1,5 @@
+#![no_std]
+
 // The tripwire is triggered.
 #[cfg(feature = "nextest")]
 compile_error!(
