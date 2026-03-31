@@ -1,0 +1,46 @@
+name: Publish releases to GitHub and crates.io
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  release:
+    if: github.repository_owner == 'nextest-rs' && startsWith(github.ref_name, 'locked-tripwire-')
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write # Required for OIDC token exchange with crates.io.
+      contents: write # Required for creating GitHub releases.
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      # Derive the version directory from the tag. Tags are of the form
+      # `locked-tripwire-<version>`, and the corresponding source lives in
+      # the `<version>/` directory (e.g. `0.1.1/`, `0.1.1002/`).
+      - name: Determine version directory
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#locked-tripwire-}"
+          if [ ! -d "$VERSION" ]; then
+            echo "::error::No directory found for version $VERSION"
+            exit 1
+          fi
+          echo "dir=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - uses: taiki-e/create-gh-release-action@c5baa0b5dc700cf06439d87935e130220a6882d9 # v1
+        with:
+          prefix: locked-tripwire
+          title: $prefix $version
+          branch: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to crates.io
+        run: cargo publish --manifest-path "${{ steps.version.outputs.dir }}/Cargo.toml"
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
