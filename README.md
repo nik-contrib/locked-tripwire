@@ -23,7 +23,11 @@ In your top-level binary crate's `Cargo.lock`, add:
 locked-tripwire = "0.1.1"
 ```
 
-Then, run `cargo update locked-tripwire --precise 0.1.1`.
+Then, run:
+
+```sh
+cargo update locked-tripwire --precise 0.1.1
+```
 
 When used without `--locked`, `cargo install xxx` will update this crate to 0.1.1002, causing the tripwire to be triggered.
 
@@ -37,9 +41,31 @@ If you urgently need a bugfix, you are always welcome to patch out this dependen
 
 If and when `cargo install --locked` becomes the default, even on an opt-in per-binary basis, we'll remove this hack.
 
-## Features
+## Custom error message
 
-The `nextest` feature customizes the error message to be cargo-nextest specific.
+By default, the error message shows this:
+
+```
+error: This binary does not support being installed without --locked. To install, run:
+
+       cargo install --locked <binary>
+ --> src/lib.rs:4:1
+  |
+4 | compile_error!(include_str!(concat!(env!("OUT_DIR"), "/message.txt")));
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+
+This message can be customized by setting the `LOCKED_TRIPWIRE_MESSAGE` environment variable, which can be done via `.cargo/config.toml`:
+
+```toml
+[env]
+LOCKED_TRIPWIRE_MESSAGE = """
+Nextest does not support being installed without --locked. To install nextest from source, run:
+
+cargo install --locked cargo-nextest
+
+For more, see https://nexte.st/docs/installation/from-source/"""
+```
 
 ## License
 
